@@ -57,21 +57,90 @@ import (
 )
 
 func main() {
-	password := 0
-	currentPosition := 50
+	startPosition := 50
+	lines := readFile()
+	//p1 := part1(startPosition, lines)
+	p2 := part2(startPosition, lines)
+
+	//fmt.Printf("The password in the first part is: %d\n", p1)
+	fmt.Printf("The password in the second part is: %d\n", p2)
+}
+
+func readFile() []string {
+	var lines []string
 
 	file, err := os.Open("puzzleInput.txt")
 	if err != nil {
 		log.Fatal(err)
+		return lines
 	}
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := scanner.Text()
+		lines = append(lines, line)
+	}
+
+	if err := scanner.Err(); err != nil {
+		log.Fatal(err)
+		return lines
+	}
+
+	return lines
+}
+
+func part2(currentPosition int, lines []string) int {
+	password := 0
+
+	for _, line := range lines {
 		var direction rune
 		var distance int
 		fmt.Sscanf(line, "%c%d", &direction, &distance)
+
+		rotations := 0
+		oldPosition := currentPosition
+
+		if distance > 99 {
+			rotations = abs(distance) / 100
+			fmt.Printf("the dial rotates %d since distance is %d, ", rotations, distance)
+			distance = distance - (distance / 100 * 100)
+			fmt.Printf("new distance: %d\n", distance)
+		}
+
+		password += rotations
+
+		switch direction {
+		case 'L':
+			currentPosition = (currentPosition - distance + 100) % 100
+		case 'R':
+			currentPosition = (currentPosition + distance) % 100
+		}
+
+		switch {
+		case direction == 'L' && currentPosition >= oldPosition:
+			fmt.Printf("Line %s: Left rotation from %d to %d\n", line, oldPosition, currentPosition)
+			password++
+		case direction == 'R' && currentPosition <= oldPosition:
+			fmt.Printf("Line %s: Right rotation from %d to %d\n", line, oldPosition, currentPosition)
+			password++
+		case currentPosition == 0:
+			fmt.Printf("Line %s: Dial landed on 0 from %d\n", line, oldPosition)
+			password++
+		}
+	}
+
+	return password
+}
+
+func part1(currentPosition int, lines []string) int {
+	password := 0
+
+	for _, line := range lines {
+		var direction rune
+		var distance int
+		fmt.Sscanf(line, "%c%d", &direction, &distance)
+
 		switch direction {
 		case 'L':
 			currentPosition = (currentPosition - distance + 100) % 100
@@ -84,9 +153,12 @@ func main() {
 		}
 	}
 
-	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
-	}
+	return password
+}
 
-	fmt.Printf("The password is: %d\n", password)
+func abs(a int) int {
+	if a < 0 {
+		return -a
+	}
+	return a
 }
