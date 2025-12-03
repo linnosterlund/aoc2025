@@ -59,10 +59,11 @@ import (
 func main() {
 	startPosition := 50
 	lines := readFile()
-	//p1 := part1(startPosition, lines)
+
+	p1 := part1(startPosition, lines)
 	p2 := part2(startPosition, lines)
 
-	//fmt.Printf("The password in the first part is: %d\n", p1)
+	fmt.Printf("The password in the first part is: %d\n", p1)
 	fmt.Printf("The password in the second part is: %d\n", p2)
 }
 
@@ -98,36 +99,28 @@ func part2(currentPosition int, lines []string) int {
 		var distance int
 		fmt.Sscanf(line, "%c%d", &direction, &distance)
 
-		rotations := 0
 		oldPosition := currentPosition
 
-		if distance > 99 {
-			rotations = abs(distance) / 100
-			fmt.Printf("the dial rotates %d since distance is %d, ", rotations, distance)
-			distance = distance - (distance / 100 * 100)
-			fmt.Printf("new distance: %d\n", distance)
-		}
-
-		password += rotations
+		password += distance / 100
+		distance = distance - (distance / 100 * 100)
 
 		switch direction {
 		case 'L':
-			currentPosition = (currentPosition - distance + 100) % 100
+			currentPosition -= distance
 		case 'R':
-			currentPosition = (currentPosition + distance) % 100
+			currentPosition += distance
 		}
 
 		switch {
-		case direction == 'L' && currentPosition >= oldPosition:
-			fmt.Printf("Line %s: Left rotation from %d to %d\n", line, oldPosition, currentPosition)
+		case currentPosition == 0 && distance != 0:
 			password++
-		case direction == 'R' && currentPosition <= oldPosition:
-			fmt.Printf("Line %s: Right rotation from %d to %d\n", line, oldPosition, currentPosition)
+		case currentPosition < 0 && oldPosition > 0:
 			password++
-		case currentPosition == 0:
-			fmt.Printf("Line %s: Dial landed on 0 from %d\n", line, oldPosition)
+		case currentPosition > 99:
 			password++
 		}
+
+		currentPosition = (currentPosition + 100) % 100
 	}
 
 	return password
