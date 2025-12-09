@@ -9,11 +9,6 @@ import (
 	"strings"
 )
 
-/*
-- fresh ingredient id ranges
-- available ids
-*/
-
 type IDRange struct {
 	StartID int
 	EndID   int
@@ -133,16 +128,4 @@ func getInt(s string) int {
 		fmt.Printf("error parsing string %s", s)
 	}
 	return n
-}
-
-func insertSorted(slice []int, value int) []int {
-	i := sort.Search(len(slice), func(i int) bool {
-		return slice[i] >= value
-	})
-
-	slice = append(slice, 0)
-	copy(slice[i+1:], slice[i:])
-	slice[i] = value
-
-	return slice
 }
